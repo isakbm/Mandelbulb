@@ -3,25 +3,27 @@ Mandelbulb explorer
 
 Hello, I'm relatively new to making projects and pushing them to github, so bare with me :)
 
-This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the of the standard 2D fractal, the Mandelbrot set. The equation that encodes the Mandelbrot set is perhaps familiar to you
+This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the standard 2D fractal, the Mandelbrot set. The equation that encodes the Mandelbrot set is perhaps familiar to you
 
-z = z^2 + c  (1)
+z = z^2 + c 
 
 where z and c are complex numbers. The input, c, is fixed and then the equation is iterated starting from z = 0. The result is a sequence of complex numbers where the first one is c, the second one is c + c^2, and so on. If c is picked to represent a pixel on the screen
 
-c = x + i y.
+c = x + i y. 
 
-The transformation (1) effectively displaces the original pixel coordinates (x,y), and eventually we might "escape". By escaping we mean that the distance to the origin has become greater than 2
+then the transformation effectively displaces the original pixel coordinates (x,y), and eventually we might "escape". By escaping we mean that the distance to the origin has become greater than 2
 
-|z| > 2    we bail.
+|z| > 2    we bail.  
 
-It can be shown that if this happens, the transformations will continue to increase the distance to the origin, hence diverge. On the other hand, if the radius remains less than 2 after an infinite number of iterations, we say that the pixel corresponding to the initial value c is a member of the Mandelbrot set. Since we are unable to iterate to infinity we are always seeing an approximation of the Mandelbrot set, but the convergence is quite fast and a good approximation is easily gained within the limits of machine precision.
+It can be shown the transformations will continue to increase the distance to the origin if |z| > 2. On the other hand, if the radius remains less than or equal to 2 after an infinite number of iterations, we say that the pixel corresponding to the initial value c is a member of the Mandelbrot set.
+
+Since we are unable to iterate to infinity we are always seeing an approximation of the Mandelbrot set, but the convergence is quite fast and a good approximation is easily gained within the limits of machine precision.
 
 Generalizing to 3D
 ----------------------------------------------------------------------------------------------------
 Let us now generalize to higher dimensions. Consider the position vector associated with c
 
-v = (x, y)
+v = (x, y)  
 
 A step in the iteration (1) can be interpreted as adding v rotated and scaled to v itself.
 Indeed, using the Euler formula makes this clear
@@ -55,8 +57,10 @@ Generalizing to higher power
 ----------------------------------------------------------------------------------------------------
 We can generalize even more by considering
 
-z = z^pow + c
+z = z^pow + c.
 
-here pow = 2 would give the cases we have been discussing above, but it makes sense to consider higher powers. It is simply to deduce what the effect is in the 2D case for complex numbers. The result is that we should take the length to the power of pow and we should rotate by phi (pow-1) number of times. This is easy to generalize. The name Mandebulb is usually associated with the fractal that you get if you have pow ~ 6 to 8.
+It is clear that if we set pow = 2 we recover what we considered above, but why not consider other powers. It is simple to deduce what the effect is in the 2D case for complex numbers. The result is that we should take the length to the power of pow, and we should rotate by phi, (pow-1) number of times. This is easy to generalize.
+
+The name Mandebulb is usually associated with the fractal that you get if you have pow ~ 6 to 8.
 
 ----------------------------------------------------------------------------------------------------
