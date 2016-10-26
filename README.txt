@@ -1,0 +1,9 @@
+Mandelbulb explorer
+
+Hello, I'm relatively new to making projects and pushing them to github, so bare with me :)
+
+This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the of the standard 2D fractal, the Mandelbrot set. The equation that encodes the Mandelbrot set is perhaps familiar to you
+
+z = z^2 + c  (1)
+
+where z and c are complex numbers. The input, c, is fixed and then the equation is iterated starting from z = 0. The result is a sequence of complex numbers where the first one is c, the second one is c + c^2, and so on. If c is picked to represent a pixel on the screen, the sequence can be understood as the results of applying subsequence transformations of the form (1). Effectively this is a mix of rotation and scaling of the vector that points from the origin to the pixel. The transformed coordinate will move about as we traverse the sequence, and eventually we might "escape" which is to say, have our distance to the origin greater than 2. It can be shown that if this happens the transformations will continue to increase the distance and the point is defined as outside the Mandelbrot set. On the other hand, if the radius remains less than 2 after an infinite number of iterations we say that the pixel corresponding to the initial value c is a member of the Mandelbrot set. Since we are unable to iterate to infinity we are always seeing an approximation of the Mandelbrot set, but the convergence is quite fast and a good approximation is easily gained within the limits of machine precision.
