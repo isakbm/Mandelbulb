@@ -126,10 +126,7 @@ gives that a local bailout condition (local meaning |c| dependent)
 
 |z| > 1/2 ( 1 + sqrt(1 + 4 |c|) ).
 
-For any |c| greater than this local bailout value we have guaranteed divergence
-since the first step of the Mandelbrot iteration sets |z| = |c|. The value of
-|c| for which |c| is equal to the local bailout value is then the maximum bailout
-value and hence a globally valid bailout value, it is given by solving
+For any |c| greater than this local bailout value we have guaranteed divergence since the first step of the Mandelbrot iteration sets |z| = |c|. The value of |c| for which |c| is equal to the local bailout value is then the maximum bailout value and hence a globally valid bailout value, it is given by solving
 
 |c| = 1/2 ( 1 + sqrt(1 + 4 |c|) )
 
