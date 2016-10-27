@@ -1,4 +1,4 @@
-=================================== Mandelbulb explorer ==================================================
+=================================== Mandelbulb explorer ===================================================
 -----------------------------------------------------------------------------------------------------------
 
 Hello, I'm relatively new to making projects and pushing them to github, so bare with me :)
@@ -24,7 +24,7 @@ On the other hand, if the radius remains less than or equal to 2 after an infini
 Since we are unable to iterate to infinity we are always seeing an approximation of the Mandelbrot set, but the convergence is quite fast and a good approximation is easily gained within the limits of machine precision.
 
 Generalizing to 3D
-----------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
 Let us now generalize to higher dimensions. Consider the position vector associated with c
 
 v = (x, y)  
@@ -58,7 +58,7 @@ phi = atan(y,x),
 theta = atan(sqrt(x^2 + y^2), z).
 
 Generalizing to higher power
-----------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
 We can generalize even more by considering
 
 z = z^pow + c.
@@ -67,7 +67,7 @@ It is clear that if we set pow = 2 we recover what we considered above, but why 
 
 The name Mandebulb is usually associated with the fractal that you get if you have pow ~ 6 to 8.
 
-----------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
 
 
 
@@ -77,8 +77,8 @@ The name Mandebulb is usually associated with the fractal that you get if you ha
 
 
 
-================ Some kind of proof of bailout condition for Mandelbrot =============================================
-
+================ Some kind of proof of bailout condition for Mandelbrot ===================================
+-----------------------------------------------------------------------------------------------------------
 Claim:
 
 z = z^2 + c 
@@ -144,3 +144,4 @@ which gives that |c| = 2 and hence that is the global bailout value.
 
 
 
+-----------------------------------------------------------------------------------------------------------
