@@ -82,7 +82,7 @@ float masterDist( vec3 p )
 }
 
 
-#define POWER_PARAM  5.0
+#define POWER_PARAM  4.0
 #define MAX_FRACTAL_DIST 1.2
 
 #define MAX_MARCH 10.0
@@ -139,6 +139,7 @@ vec3 getNormal(vec3 p, float d)
 void main() {
 
 	vec3 fogColor = vec3(0.5,0.5,0.5);
+	fogColor = vec3(0.0,0.0,0.0);
 	color = fogColor;
 
 	float t = 0.0;
@@ -199,14 +200,17 @@ void main() {
 			if (d < marchEpsilon)   // Criteria for being close enough to the fractal
 			{
 				// blend = exp(5.0*(t/MAX_MARCH - 1.0)); // Blending for fogging out
-				// blend = 0.0;
+				// blend = exp(5.0*(t/MAX_MARCH - 1.0)); // Blending for fogging out
+			
 				// lightVector = normalize(ray - lightPos); 
 				// float shade = -dot(getNormal(ray,marchEp), lightVector);
 
-				shade = 1.0 - 1.5*escapeTime/float(fractalMaxIt);
-				if (shade < 0) shade = 0.0;
+				// shade = 1.0 - 1.5*escapeTime/float(fractalMaxIt);
+				shade = 1.0 - i/float(marchMaxIt);
+				if (shade < 0.0) shade = 0.0;
+				shade = exp(5.0*(shade - 1.0));
 				
-				color = shade*vec3(0.8,0.9,0.9) ;//+ blend*fogColor;// blockFactor*shade*(1.0 - blend)*vec3(1.0,0.0,0.0) + blend*fogColor;
+				color = shade*vec3(0.8,0.9,0.9) + (1.0 - shade)*fogColor ;//+ blend*fogColor;// blockFactor*shade*(1.0 - blend)*vec3(1.0,0.0,0.0) + blend*fogColor;
 
 				break;
 			}
