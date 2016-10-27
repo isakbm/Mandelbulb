@@ -1,5 +1,5 @@
-Mandelbulb explorer
-----------------------------------------------------------------------------------------------------
+=================================== Mandelbulb explorer =============================================
+------------------------------------------------------------------------------------------------------
 
 Hello, I'm relatively new to making projects and pushing them to github, so bare with me :)
 
@@ -68,6 +68,16 @@ It is clear that if we set pow = 2 we recover what we considered above, but why 
 The name Mandebulb is usually associated with the fractal that you get if you have pow ~ 6 to 8.
 
 ----------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+================ Some kind of proof of bailout condition for Mandelbrot =============================================
 
 Claim:
 
