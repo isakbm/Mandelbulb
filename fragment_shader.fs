@@ -82,7 +82,7 @@ float masterDist( vec3 p )
 }
 
 
-#define POWER_PARAM  16.0
+#define POWER_PARAM  5.0
 #define MAX_FRACTAL_DIST 1.2
 
 #define MAX_MARCH 10.0
@@ -151,7 +151,8 @@ void main() {
 
 	vec3 ray, lightRay;
 
-	float maxFractalDist = 1.0 + pow(2.0,1.0/(POWER_PARAM-1.0));
+	float maxFractalDist = 3.0 + pow(2.0,1.0/(POWER_PARAM-1.0));
+
 
 	// Creat loop over 2 x 2 collection of rays and average for anti-aliasing
 		for (int i = 0; i < marchMaxIt; i++)
@@ -163,28 +164,26 @@ void main() {
 			float r = 0.0;  // r =  |f(0;c) | = | z | ,    					where  f(n;c) = f(n-1;c)^2 + c    and of course  f(0;c) = 0
 			float dr = 1.0; // dr = |f'(0;c)| = 2 | prevz | prevdr + 1 ,    computes to  f'(n;c) = 2 f(n-1;c)f'(n-1;c) + 1
 			
-
+			int escapeTime = 0;
 			float shade = 0.0;
-			for (int ii = 0; ii < fractalMaxIt ; ii++) {
+
+			for (int ii = 0; ii < fractalMaxIt ; ii++) { 
 				r = length(z);
 				if (r > maxFractalDist)
 				{
+					escapeTime = ii;
 					break;
 				}
-
-				//Experimental bail condition 
-				// if (r > pow(2.0,1.0/(POWER_PARAM-1.0)))  // 2^(1/(p-1))   for p = 2 you get 2 as you should
-				// {
-				// 	break;
-				// }
 				
 				// convert to polar coordinates
 				float theta = acos(z.z/r);
 				float phi = atan(z.y,z.x);
-				dr =  pow( r, POWER_PARAM - 1.0)*POWER_PARAM*dr + 1.0;
+				float rpow = pow(r,POWER_PARAM - 1.0);
+				dr = rpow*POWER_PARAM*dr + 1.0;	//dr =  pow( r, POWER_PARAM - 1.0)*POWER_PARAM*dr + 1.0;
+
 				
 				// scale and rotate the point
-				float zr = pow( r, POWER_PARAM);
+				float zr =  rpow*r; //pow( r, POWER_PARAM);
 				theta = theta*POWER_PARAM;
 				phi = phi*POWER_PARAM;
 
@@ -193,47 +192,21 @@ void main() {
 				z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
 				z += ray;
 				
-				// optional shade
-				shade = 1.0 - (ii*1.0/(abs(log(marchEpsilon))));
-				if (shade < 0) shade = 0.0;
-
-
 			}
 
 			d = 0.5*log(r)*r/dr;
 
-			if (d < marchEpsilon) //marchEpsilon)
+			if (d < marchEpsilon)   // Criteria for being close enough to the fractal
 			{
-				blend = exp(5.0*(t/MAX_MARCH - 1.0)); // Blending for fogging out
-				blend = 0.0;
+				// blend = exp(5.0*(t/MAX_MARCH - 1.0)); // Blending for fogging out
+				// blend = 0.0;
 				// lightVector = normalize(ray - lightPos); 
 				// float shade = -dot(getNormal(ray,marchEp), lightVector);
 
-				// if (shade > 0.0) // Only do raymarching for lightRay when we are sure that the surface is facing the light
-				// {
-				// 	float tt = 0.0;
-				// 	float dd;
-				// 	for (int ii = 0; ii < MAX_ITER_LIGHT; ii++)
-				// 	{
-				// 		lightRay = lightPos + tt*lightVector;
-				// 		dd = masterDist(lightRay);
-				// 		if (dd < EPSILON_LIGHT)
-				// 		{
-				// 				if( abs(length(ray - lightRay)) > 1)
-				// 				{
-				// 					blockFactor = 0.0;
-				// 				}
-				// 		}
-				// 		else if (tt > MAX_MARCH)
-				// 		{
-				// 			break;
-				// 		}
-
-				// 		tt += dd;
-				// 	}
-				// }
+				shade = 1.0 - 1.5*escapeTime/float(fractalMaxIt);
+				if (shade < 0) shade = 0.0;
 				
-				color = shade*(1.0 - blend)*vec3(0.8,0.9,0.9) ;//+ blend*fogColor;// blockFactor*shade*(1.0 - blend)*vec3(1.0,0.0,0.0) + blend*fogColor;
+				color = shade*vec3(0.8,0.9,0.9) ;//+ blend*fogColor;// blockFactor*shade*(1.0 - blend)*vec3(1.0,0.0,0.0) + blend*fogColor;
 
 				break;
 			}
