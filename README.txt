@@ -41,11 +41,11 @@ c = length(v) exp(i phi)
 
 c^2 = length(v)^2 exp(2 i phi)
 
-where phi = atan(y,x)
+where phi = atan(x,y)
 
 hence
 
-c^2 + c = v + length(v) Rotate(v,phi).
+c^2 + c = length(v) Rotate(v, phi) + V .
 
 We see that squaring the complex number c is equivalent to doubling the length of v and rotating it by an angle phi. This viewpoint of the iterative procedure is begging for a naive generalization to higher dimensions by simply adding another angle.
 
@@ -55,12 +55,13 @@ p = (x,y,z)
 
 and we let the iterative step be
 
-p = p + length(p)*Rotate(p,theta,phi)
+p = p + length(p) Rotate(p, theta, phi)
 
 where
 
-phi = atan(y,x),
-theta = atan(sqrt(x^2 + y^2), z).
+phi = atan(x,y),
+theta = acos(z/r),
+where r = sqrt(x^2 + y^2 + z^2).
 
 
 -----------------------------------------------------------------------------------------------------------
@@ -76,15 +77,51 @@ It is clear that if we set pow = 2 we recover what we considered above, but why 
 The name Mandebulb is usually associated with the fractal that you get if you have pow ~ 6 to 8.
 
 -----------------------------------------------------------------------------------------------------------
+================================================ Rendering ================================================
+-----------------------------------------------------------------------------------------------------------
 
------------------------------------------------------ -----------------------------------------------------
-----------------------------------------------------   ----------------------------------------------------
----------------------------------------------------     ---------------------------------------------------
-------------------------------------------------           ------------------------------------------------
----------------------------------------------------     ---------------------------------------------------
-----------------------------------------------------   ----------------------------------------------------
------------------------------------------------------ -----------------------------------------------------
+There is a tremendously powerful technique called distance estimation, which allows efficient rendering of the three dimensional fractals by use of regular ray-marching techniques. Essentially John C. Hart, Daniel J. Sanding and Louis H. Kauffman were the first to use this approach. Distance estimation says that for any position p = (x,y,z) you can compute a real number d(p), which gives the radius of a sphere which centered at p contains a set of points (its volume) such that none of the points are in the fractal set. This number d(p) can then be used as the marching step parameter, and recomputed at every step until d(p) < epsilon at which point we say that we are close enough to the fractal and we render that point in the standard ray-tracing kind of way. A very useful resource on this technique can be found here
 
+http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-iv-the-holy-grail/
+
+We would like to shed some more light on how d(p) is computed...
+
+d(p) = 0.5 log(r) r / dr
+
+where 
+
+r = |f(n;c)|
+
+and
+
+dr = |f'(n;c)|
+
+For the Mandelbrot one has 
+
+f(0;c) = 0
+f(n;c) = f(n-1;c)^2 + c
+
+this follows from f(1; c) = c^2 + c. We can compute the derivative and find
+
+f'(n;c) = 2 f(n-1;c)f'(n-1;c) + 1
+
+now it's a simple matter to compute this for a given number of iterations, and the result is that we get an estimate for a bounding volume within which the fractal is guaranteed not to be. Of course we have not motivated the expression
+
+d(p) = ... 
+
+that you see above, but that can be found in the literature.
+
+
+
+-----------------------------------------------------------------------------------------------------------
+----------------------------------------------------@-@----------------------------------------------------
+---------------------------------------------------@   @---------------------------------------------------
+--------------------------------------------------@     @--------------------------------------------------
+-------------------------------------------------@       @-------------------------------------------------
+--------------------------------------------------@     @--------------------------------------------------
+---------------------------------------------------@   @---------------------------------------------------
+----------------------------------------------------@-@----------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
 
 -----------------------------------------------------------------------------------------------------------
 ================================ Proof of Bailout Condition for Mandelbrot ================================
@@ -108,7 +145,7 @@ Consider a step in the sequence
 
 It is the ratio
 
-   |z^2 + c|
+     |z^2 + c|
 R =  -----------
 	 |z|
 
