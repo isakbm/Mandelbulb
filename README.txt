@@ -88,7 +88,7 @@ Consider a step in the sequence
 It is the ratio
 
 	 |z^2 + c|
-R =  ---------
+R =  -----------
 	    |z|
 
 that decides convergence. If R > 1 we should bail since the sequence won't converge, this statement implies that we should bail if
@@ -105,11 +105,16 @@ abs(|z|^2 - |c|) > |z|
 
 is the bailout condition. 
 
-Let us consider the two cases that resolve the abs function, first consider
+Let us consider the two cases that resolve the abs function
 
- |z|^2 > |c|
+ |z|^2 >= |c|   and    |z|^2 < |c|.
 
-in which case the bailout condition reads
+We should only be concerned with the case
+
+ |z|^2 >= |c|
+
+due to the nature of divergence --> increase in |z|.
+The bailout condition then reads
 
 |z|^2 - |c| > |z|
 
@@ -117,51 +122,18 @@ solving the corresponding quadratic equation
 
 |z|^2 - |z| - |c| > 0
 
-gives that the bailout condition is 
+gives that a local bailout condition (local meaning |c| dependent)
 
 |z| > 1/2 ( 1 + sqrt(1 + 4 |c|) ).
 
-The minimum value for |z| that satisfies the bailout condition corresponds to what we call the bailout value. So it follows that the bailout value is
+For any |c| greater than this local bailout value we have guaranteed divergence
+since the first step of the Mandelbrot iteration sets |z| = |c|. The value of
+|c| for which |c| is equal to the local bailout value is then the maximum bailout
+value and hence a globally valid bailout value, it is given by solving
 
-|z| = 1/2( 1 + sqrt(1 + 4 |c|)). 
+|c| = 1/2 ( 1 + sqrt(1 + 4 |c|) )
+
+which gives that |c| = 2 and hence that is the global bailout value.
 
 
-but the minimum value of |z| is also |c| since |z| > |c|
-it follows 
-
-Lastly we consider the case 
-
- |z|^2 < |c|
-
-in which case the bailout condition reads
-
-|c| - |z|^2  > |z|
-
-solving the corresponding quadratic equation
-
--|z|^2 - |z| + |c| > 0
-
-gives that the bailout condition is 
-
-|z| > 1/2 ( -1 + sqrt(1 + 4 |c|) ).
-
-The minimum value for |z| that satisfies the bailout condition corresponds to what we call the bailout value. So it follows that the bailout value is
-
-|z| = 1/2( -1 + sqrt(1 + 4 |c|)). 
-
-We want a number not a function depending on |c|. So we simply take the maximum of what we have found so far, and clearly the bailout value (let's denote the bailout value |zb|) we found above for |z|^2 < |c| is less than the one we found previously for |z|^2 > |c| namely
-
-1/2( 1 + sqrt(1 + 4 |c|))
-
-since |c| > 0, we see that 
-
-1/2( 1 + sqrt(1 + 4 |c|)) > 1
-
-We see that the ultimate bailout value is given by the value of |c| for which the bailout value is |c| hence
-
-|zb| = 1/2(1 + sqrt(1 + 4|zb|))
-
-which solves to give
-
-|zb| = 2.
 
