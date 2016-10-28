@@ -15,7 +15,6 @@ uniform float resx; // width of window in pixels
 uniform float resy; // height of window in pixels
 
 uniform float frameTime; // time running ~ frames
-
 uniform float frustumD;
 
 // camera variables
@@ -143,7 +142,7 @@ void main() {
 				color = fogColor;
 				break;
 			}
-			
+
 			t += d;
 		}
 }
