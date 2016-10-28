@@ -3,7 +3,10 @@
 // Ouput data
 out vec3 color;
 
-// varying variables
+// constants
+float pi = 3.1415926535897932384626433832795;
+
+// window variables
 uniform float minx; // x-coordinate lower left corner of camera
 uniform float miny; // y-cooridnate lower left corner of camera
 uniform float dx;   // width camera
@@ -14,73 +17,31 @@ uniform float resy; // height of window in pixels
 uniform float frameTime; // time running ~ frames
 
 uniform float frustumD;
-uniform int lightToggle;
 
-uniform float joyAxisX1; // Joystick input 
-uniform float joyAxisY1;
-uniform float joyAxisX2;
-uniform float joyAxisY2;
-uniform float joyAxisL2;
-uniform float joyAxisR2;
-
-uniform float axisPanX1;
-uniform float axisPanY1;
-uniform float axisPanX2;
-uniform float axisPanY2;
-uniform float axisPanL2;
-uniform float axisPanR2;
-
-
+// camera variables
 uniform vec3 posVec;
 uniform vec3 viewVec;
 uniform vec3 upVec;
 uniform vec3 rightVec;
 
-uniform int joyButtonB;
-uniform float panButtonB;
-
+// application control variables 
 uniform int fractalMaxIt;
 uniform int marchMaxIt;
-
 uniform float marchEpsilon;
-
-uniform int drawMandelbrot = 1;
-
-// Camera orientation
-float pi = 3.1415926535897932384626433832795;
 
 // Pixel coordinates
 float Xc = gl_FragCoord.x - minx - 0.5*resx; // Centralized FOV x coordinate
 float Yc = gl_FragCoord.y - miny - 0.5*resy; // Centralized FOV y coordinate
 
-// Ray
-vec3 rayDir = normalize(frustumD*viewVec + Xc*rightVec + Yc*upVec);//normalize(frustumD*vec3(0,0,-1) + Xc*vec3(1,0,0) + Yc*vec3(0,1,0));
-vec3 raySourcePos = posVec;
-
-// Fov
-
-float FOVx = 2*atan(0.5*resx/frustumD);
-float FOVy = 2*atan(0.5*resy/frustumD);
+// Ray for tracing
+vec3 rayDir = normalize(frustumD*viewVec + Xc*rightVec + Yc*upVec);
 
 // Distance function
 
-float sdSphere( vec3 p, float r) // signed distance function for a sphere of radius r located at origin,
-{
-	return length(p) - r;
-}
-
-float sdTorus( vec3 p, vec2 t )
-{
-	vec2 q = vec2(length(p.xz)-t.x,p.y);
-  	return length(q)-t.y;
-}
-
-float masterDist( vec3 p )
-{
-	vec2 q = vec2(length(p.xz) - 1000, p.y);
-	return min(min(length(q) - 100, length(p) - 500), min(length(p-vec3(-600,600,0)) - 200,length(p-vec3(-1000,600,0)) - 50 ));
-}
-
+// float sdSphere( vec3 p, float r) // signed distance function for a sphere of radius r located at origin,
+// {
+// 	return length(p) - r;
+// }
 
 #define POWER_PARAM  4.0
 #define MAX_FRACTAL_DIST 1.2
@@ -90,51 +51,14 @@ float masterDist( vec3 p )
 #define MAX_ITER_LIGHT 100
 #define EPSILON_LIGHT 0.01
 
-// float DE(vec3 pos)
+// vec3 getNormal(vec3 p, float d)
 // {
-// 	// return 2;
-// 	vec3 z = pos;
-// 	float dr = 3.5;
-// 	float r = 0.0;
+// 	vec3 x = vec3(1,0,0);
+// 	vec3 y = vec3(0,1,0);
+// 	vec3 z = vec3(0,0,1);
 
-// 	float maxFractalDist = pow(2.0,1.0/(POWER_PARAM-1.0));
-	
-// 	for (int i = 0; i < fractalMaxIt ; i++) {
-// 		r = length(z);
-// 		if (r > maxFractalDist){
-// 			break;
-// 		}
-		
-// 		// convert to polar coordinates
-// 		float theta = acos(z.z/r);
-// 		float phi = atan(z.y,z.x);
-// 		dr =  pow( r, POWER_PARAM - 1.0)*POWER_PARAM*dr + 1.0;
-		
-// 		// scale and rotate the point
-// 		float zr = pow( r, POWER_PARAM);
-// 		theta = theta*POWER_PARAM;
-// 		phi = phi*POWER_PARAM;
-		
-// 		// convert back to cartesian coordinates
-// 		z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
-// 		z+=pos;
-// 	}
-
-// 	return 0.5*log(r)*r/dr;//min(0.5*log(r)*r/dr, length(pos) - 1);
+// 	return vec3(0,0,0);//normalize(vec3(masterDist(p + d*x), masterDist(p + d*y), masterDist(p + d*z)) - masterDist(p)*vec3(1,1,1));
 // }
-
-
-
-
-
-vec3 getNormal(vec3 p, float d)
-{
-	vec3 x = vec3(1,0,0);
-	vec3 y = vec3(0,1,0);
-	vec3 z = vec3(0,0,1);
-
-	return normalize(vec3(masterDist(p + d*x), masterDist(p + d*y), masterDist(p + d*z)) - masterDist(p)*vec3(1,1,1));
-}
 
 void main() {
 
@@ -158,7 +82,7 @@ void main() {
 	// Creat loop over 2 x 2 collection of rays and average for anti-aliasing
 		for (int i = 0; i < marchMaxIt; i++)
 		{
-			ray = raySourcePos + t*rayDir;
+			ray = posVec + t*rayDir;
 					
 			// return 2;
 			vec3 z = ray;
@@ -219,11 +143,9 @@ void main() {
 				color = fogColor;
 				break;
 			}
-
+			
 			t += d;
 		}
-	
-
 }
 
 
