@@ -5,6 +5,13 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+struct vec2 {
+    double x, y; 
+ 
+    vec2(double x = 0.0, double y = 0.0) : x(x), y(y) {}
+};
+ 
+
 struct vec3 {
 	double x, y, z;	
  
@@ -41,36 +48,68 @@ vec3 normalize(vec3 vec) {
 
 class Controller
 {
-        int state;
-        int prevState;
     public:
+        int state, prevState;
+        float trigger_L, trigger_R;
+        float dZ;  // deadZone
+        float stick_L_x, stick_L_y, stick_R_x, stick_R_y;
+
         Controller ( )
         {
-            state = 0;
+            state     = 0;
             prevState = 0;
+
+            trigger_L = -1.0;
+            trigger_R = -1.0;
+            
+            stick_L_x = 0.0;
+            stick_L_y = 0.0;
+            stick_R_x = 0.0;
+            stick_R_y = 0.0;
+
+            dZ = 0.30;
         }
         Controller (int s)
         {
             state = s;
             prevState = 0;
         }
-        void set_state(int s)
+        void set_state (int s)
         {
             state = s;
         }
-        void set_prevState(int s)
+        void set_prevState (int s)
         {
             prevState = s;
         }
+        void set_deadZone (float deadZone)
+        {
+            dZ = deadZone;
+        }
+
+        void set_sticks(const float * a)
+        {
+            stick_L_x = ( a[0] > dZ ) ? (a[0] - dZ)/(1.0 - dZ) : std::min( (a[0] + dZ)/(1.0 - dZ) , 0.0);
+            stick_L_y = ( a[1] > dZ ) ? (a[1] - dZ)/(1.0 - dZ) : std::min( (a[1] + dZ)/(1.0 - dZ) , 0.0);
+            stick_R_x = ( a[2] > dZ ) ? (a[2] - dZ)/(1.0 - dZ) : std::min( (a[2] + dZ)/(1.0 - dZ) , 0.0);
+            stick_R_y = ( a[3] > dZ ) ? (a[3] - dZ)/(1.0 - dZ) : std::min( (a[3] + dZ)/(1.0 - dZ) , 0.0);
+        }
+
+        void set_triggers(const float * a)
+        {
+            trigger_L =  ( a[4] > (dZ - 1.0) ) ? (a[4] - 0.5*dZ)/(1.0 - 0.5*dZ) : -1.0; 
+            trigger_R =  ( a[5] > (dZ - 1.0) ) ? (a[5] - 0.5*dZ)/(1.0 - 0.5*dZ) : -1.0;
+        } 
+
         int get_state()
         {
             return state;
         }
-        bool pressed(int button)
+        bool pressed (int button)
         {
             return (button & state);
         }
-        bool rePressed(int button)
+        bool rePressed (int button)
         {
             return (!(button & prevState) && (button & state)) ;
         }
@@ -85,20 +124,6 @@ double prevx = -1, prevy = -1;
 double resx = 1100, resy = 600;
 
 float frameTime = 0.0; 
-
-float joyAxisX1 = 0.0;
-float joyAxisY1 = 0.0;
-float joyAxisX2 = 0.0;
-float joyAxisY2 = 0.0;
-float joyAxisL2 = 0.0;
-float joyAxisR2 = 0.0;
-
-bool buttonToggleL1         = false;
-bool buttonToggleR1         = false;
-bool buttonToggleUPArrow    = false;
-bool buttonToggleDownArrow  = false;
-bool buttonToggleRightArrow = false;
-bool buttonToggleLeftArrow  = false;
 
 float disVecX    = 0.0;
 float disVecY    = 0.0;
@@ -140,7 +165,6 @@ static const GLfloat vertex_buffer_data[] =
     -1.0f,  1.0f, 0.0f,
      1.0f,  1.0f, 0.0f,
 };
-
 
 char *readFile(const char *filename)
 {
@@ -381,47 +405,13 @@ void joystick_callback()
     // Configured for XBOX controller
 
 	int axesCount;
+
     const float *axes = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &axesCount );
      
-    float deadZone = 0.30;
-  
-    if ( axes[0] > deadZone ) // joyAxisX1
-    	joyAxisX1 = (axes[0] - deadZone)/(1.0 - deadZone);
-    else if ( axes[0] < -deadZone )
-    	joyAxisX1 = (axes[0] + deadZone)/(1.0 - deadZone);
-    else
-    	joyAxisX1 = 0.0;
-   
-    if ( axes[1] > deadZone ) // joyAxisY1
-    	joyAxisY1 = (axes[1] - deadZone)/(1.0 - deadZone);
-    else if ( axes[1] < -deadZone )
-    	joyAxisY1 = (axes[1] + deadZone)/(1.0 - deadZone);
-    else
-    	joyAxisY1 = 0.0;
-   
-    if ( axes[2] > deadZone ) // joyAxisX2
-    	 joyAxisX2 = (axes[2] - deadZone)/(1.0 - deadZone);
-    else if ( axes[2] < -deadZone )
-    	 joyAxisX2 = (axes[2] + deadZone)/(1.0 - deadZone);
-    else
-    	 joyAxisX2 = 0.0;
-    
-    if ( axes[3] > deadZone ) // joyAxisY2
-    	joyAxisY2 = (axes[3] - deadZone)/(1.0 - deadZone);
-    else if ( axes[3] < -deadZone )
-    	joyAxisY2 = (axes[3] + deadZone)/(1.0 - deadZone);
-    else
-    	joyAxisY2 = 0.0;
-	
-	if ( axes[4] > (deadZone - 1.0) ) // joyAxisL2
-    	joyAxisL2 = (axes[4] - 0.5*deadZone)/(1.0 - 0.5*deadZone);
-    else
-    	joyAxisL2 = -1.0;
-	
-	if ( axes[5] > (deadZone - 1.0) ) // joyAxisR2
-    	joyAxisR2 = (axes[5] - 0.5*deadZone)/(1.0 - 0.5*deadZone);
-    else
-    	joyAxisR2 = -1.0;
+    xbox.set_deadZone(0.30);
+    xbox.set_sticks(axes);
+    xbox.set_triggers(axes);
+
    
     int buttonCount;
     const unsigned char *buttons = glfwGetJoystickButtons( GLFW_JOYSTICK_1, &buttonCount );
@@ -480,7 +470,10 @@ void joystick_callback()
             marchMaxIt = 1;
         std::cout << "march max it = " << marchMaxIt  << std::endl;
     }
-
+    if ( xbox.rePressed(XBOX_A) )
+    {
+        std::cout << xbox.trigger_R << std::endl;    
+    }
     
     const char *name = glfwGetJoystickName( GLFW_JOYSTICK_1 );
 
@@ -488,13 +481,15 @@ void joystick_callback()
 
 	float viewSpeed = 0.03;
 
-	rightVec = normalize(rightVec - viewSpeed*joyAxisX2*viewVec) ;
-	upVec    = normalize(upVec    - viewSpeed*joyAxisY2*viewVec) ;
-	viewVec  = normalize(viewVec  + viewSpeed*joyAxisY2*upVec + viewSpeed*joyAxisX2*rightVec) ;
+    vec2 joyAxis2 = vec2(xbox.stick_R_x, xbox.stick_R_y);
 
-	rightVec = normalize(rightVec);
+    rightVec = normalize( rightVec - viewSpeed*joyAxis2.x*viewVec ) ;
+    upVec    = normalize( upVec    - viewSpeed*joyAxis2.y*viewVec ) ;
+    viewVec  = normalize( viewVec  + viewSpeed*joyAxis2.y*upVec + viewSpeed*joyAxis2.x*rightVec ) ;
 
-	posVec   = posVec + (0.01*xbox.pressed(XBOX_B) +  0.0001)*(joyAxisR2 - joyAxisL2)*viewVec;
+	rightVec = normalize( rightVec );
+
+	posVec   = posVec + ( 0.01*xbox.pressed(XBOX_B) +  0.0001 )*(xbox.trigger_R - xbox.trigger_L)*viewVec;
 
 }
 
