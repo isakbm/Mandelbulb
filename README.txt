@@ -4,7 +4,7 @@
 ===========================================                     ===========================================
 -----------------------------------------------------------------------------------------------------------
 
-Hello, I'm relatively new to making projects and pushing them to github, so bare with me :)
+Hello, I'm relatively new to making projects and pushing them to github, so bare with me :))
 
 This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the standard 2D fractal, the Mandelbrot set. The equation that encodes the Mandelbrot set is perhaps familiar to you
 
