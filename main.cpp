@@ -279,9 +279,7 @@ void Draw() {
     loc = glGetUniformLocation(programID, "dy");
     if (loc != -1) 
         glUniform1f(loc, dy);
-    loc = glGetUniformLocation(programID, "drawMandelbrot");
-    if (loc != -1) 
-        glUniform1i(loc, drawMandelbrot);
+ 
 
     loc = glGetUniformLocation(programID, "frameTime"); // Let's send over the frame time
     if (loc != -1) 
@@ -311,57 +309,7 @@ void Draw() {
     if (loc != -1) 
         glUniform1f(loc, frustumD);
 
-    // Passing on JoyStick input values
-    loc = glGetUniformLocation(programID, "joyAxisX1"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, joyAxisX1);    
-    loc = glGetUniformLocation(programID, "joyAxisY1"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, joyAxisY1);
-    loc = glGetUniformLocation(programID, "joyAxisX2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, joyAxisX2);
-    loc = glGetUniformLocation(programID, "joyAxisY2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, joyAxisY2);    
-    loc = glGetUniformLocation(programID, "joyAxisL2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, joyAxisL2);
-    loc = glGetUniformLocation(programID, "joyAxisR2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, joyAxisR2);
 
-    loc = glGetUniformLocation(programID, "axisPanX1"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, axisPanX1);
-    loc = glGetUniformLocation(programID, "axisPanY1"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, axisPanY1);
-    loc = glGetUniformLocation(programID, "axisPanX2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, axisPanX2);
-    loc = glGetUniformLocation(programID, "axisPanY2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, axisPanY2);
-    loc = glGetUniformLocation(programID, "axisPanL2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, axisPanL2);
-    loc = glGetUniformLocation(programID, "axisPanR2"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, axisPanR2);
-
- 	loc = glGetUniformLocation(programID, "joyButtonB"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1i(loc, joyButtonB);
-
- 	loc = glGetUniformLocation(programID, "panButtonB"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1f(loc, panButtonB);
-
-
-    loc = glGetUniformLocation(programID, "lightToggle"); // Let's send over the frame time
-    if (loc != -1) 
-        glUniform1i(loc, lightToggle);
 
     loc = glGetUniformLocation(programID, "viewVec"); // Let's send over the frame time
     if (loc != -1) 
@@ -626,7 +574,7 @@ void joystick_callback() {
             marchMaxIt += (1.0 + 9.0*joyButtonX)*10.0;
             std::cout << "march max it = " << marchMaxIt  << std::endl;
         }
-    }
+    }   
     if ( GLFW_RELEASE == buttons[11] ) // RIGHT ARROW - release
     {
         buttonToggleRightArrow = false;
