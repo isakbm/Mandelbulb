@@ -9,8 +9,6 @@ float pi = 3.1415926535897932384626433832795;
 // window variables
 uniform float minx; // x-coordinate lower left corner of camera
 uniform float miny; // y-cooridnate lower left corner of camera
-uniform float dx;   // width camera
-uniform float dy;   // height camera
 uniform float resx; // width of window in pixels
 uniform float resy; // height of window in pixels
 
@@ -29,8 +27,8 @@ uniform int marchMaxIt;
 uniform float marchEpsilon;
 
 // Pixel coordinates
-float Xc = gl_FragCoord.x - minx - 0.5*resx; // Centralized FOV x coordinate
-float Yc = gl_FragCoord.y - miny - 0.5*resy; // Centralized FOV y coordinate
+float Xc = gl_FragCoord.x - 0.5*resx; // Centralized FOV x coordinate
+float Yc = gl_FragCoord.y - 0.5*resy; // Centralized FOV y coordinate
 
 // Ray for tracing
 vec3 rayDir = normalize(frustumD*viewVec + Xc*rightVec + Yc*upVec);
