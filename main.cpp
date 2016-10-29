@@ -46,9 +46,13 @@ vec3 normalize(vec3 vec) {
 	return vec/norm(vec);
 }
 
+enum xboxButtonMap { XBOX_A = 1, XBOX_B = 2, XBOX_X = 4, XBOX_Y = 8, XBOX_UP = 16, XBOX_DOWN = 32, XBOX_RIGHT = 64, 
+                     XBOX_LEFT = 128, XBOX_L1 = 256, XBOX_R1 = 512, XBOX_OPTION = 1024, XBOX_START = 2048, XBOX_AXIS1 = 4096, XBOX_AXIS2 = 8192};
+
 class Controller
 {
     public:
+
         int state, prevState;
         float trigger_L, trigger_R;
         float dZ;  // deadZone
@@ -69,41 +73,41 @@ class Controller
 
             dZ = 0.30;
         }
-        Controller (int s)
-        {
-            state = s;
-            prevState = 0;
-        }
-        void set_state (int s)
-        {
-            state = s;
-        }
-        void set_prevState (int s)
-        {
-            prevState = s;
-        }
         void set_deadZone (float deadZone)
         {
             dZ = deadZone;
         }
 
-        void set_sticks(const float * a)
+        void set_sticks(const float * a)  
         {
-            stick_L_x = ( a[0] > dZ ) ? (a[0] - dZ)/(1.0 - dZ) : std::min( (a[0] + dZ)/(1.0 - dZ) , 0.0);
+            stick_L_x = ( a[0] > dZ ) ? (a[0] - dZ)/(1.0 - dZ) : std::min( (a[0] + dZ)/(1.0 - dZ) , 0.0);   // These computations handle the dead-zone problem 
             stick_L_y = ( a[1] > dZ ) ? (a[1] - dZ)/(1.0 - dZ) : std::min( (a[1] + dZ)/(1.0 - dZ) , 0.0);
             stick_R_x = ( a[2] > dZ ) ? (a[2] - dZ)/(1.0 - dZ) : std::min( (a[2] + dZ)/(1.0 - dZ) , 0.0);
             stick_R_y = ( a[3] > dZ ) ? (a[3] - dZ)/(1.0 - dZ) : std::min( (a[3] + dZ)/(1.0 - dZ) , 0.0);
         }
-
         void set_triggers(const float * a)
-        {
-            trigger_L =  ( a[4] > (dZ - 1.0) ) ? (a[4] - 0.5*dZ)/(1.0 - 0.5*dZ) : -1.0; 
+        { 
+            trigger_L =  ( a[4] > (dZ - 1.0) ) ? (a[4] - 0.5*dZ)/(1.0 - 0.5*dZ) : -1.0;  // These computations handle the dead-zone problem 
             trigger_R =  ( a[5] > (dZ - 1.0) ) ? (a[5] - 0.5*dZ)/(1.0 - 0.5*dZ) : -1.0;
         } 
-
-        int get_state()
+        void set_buttons(const unsigned char * b)
         {
-            return state;
+            prevState = state;
+            state = 0;
+            state += b[0]  ? XBOX_A       : 0;
+            state += b[1]  ? XBOX_B       : 0;
+            state += b[2]  ? XBOX_X       : 0;
+            state += b[3]  ? XBOX_Y       : 0;
+            state += b[4]  ? XBOX_L1      : 0;
+            state += b[5]  ? XBOX_R1      : 0;
+            state += b[6]  ? XBOX_OPTION  : 0;
+            state += b[7]  ? XBOX_START   : 0;
+            state += b[8]  ? XBOX_AXIS1   : 0;
+            state += b[9]  ? XBOX_AXIS2   : 0;
+            state += b[10] ? XBOX_UP      : 0;
+            state += b[11] ? XBOX_RIGHT   : 0;
+            state += b[12] ? XBOX_DOWN    : 0;
+            state += b[13] ? XBOX_LEFT    : 0;
         }
         bool pressed (int button)
         {
@@ -149,8 +153,7 @@ int clickedButtons = 0;
 enum buttonMaps { FIRST_BUTTON=1, SECOND_BUTTON=2, THIRD_BUTTON=4, FOURTH_BUTTON=8, FIFTH_BUTTON=16, NO_BUTTON=0 };
 enum modifierMaps { CTRL=2, SHIFT=1, ALT=4, META=8, NO_MODIFIER=0 };
 
-enum xboxButtonMap { XBOX_A = 1, XBOX_B = 2, XBOX_X = 4, XBOX_Y = 8, XBOX_UP = 16, XBOX_DOWN = 32, XBOX_RIGHT = 64, 
-                     XBOX_LEFT = 128, XBOX_L1 = 256, XBOX_R1 = 512, XBOX_OPTION = 1024, XBOX_START = 2048, XBOX_AXIS1 = 4096, XBOX_AXIS2 = 8192};
+
 
 int drawMandelbrot = 1;
 
@@ -276,7 +279,62 @@ int main()
     	joystickPresent = glfwJoystickPresent( GLFW_JOYSTICK_1 );
     	// std::cout << "Joystick status: " << present << std::endl;   
 		if (joystickPresent)
-			joystick_callback();
+        {
+			joystick_callback(); // Updates state of controller
+
+           
+            float factor = 0.75; // marchEpsilon control
+            if ( xbox.rePressed(XBOX_L1) )
+            {
+                marchEpsilon *= factor;
+                std::cout << "march epsilon = " << marchEpsilon << std::endl;
+            }
+            if ( xbox.rePressed(XBOX_R1) )
+            {
+                marchEpsilon *= 1.0/factor;
+                std::cout << "march epsilon = " << marchEpsilon << std::endl;
+            }
+
+            if ( xbox.rePressed(XBOX_UP) ) // fractalMaxIt control
+            {
+                fractalMaxIt += (1 + 9*xbox.pressed(XBOX_X))*3;
+                std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
+            }
+            if ( xbox.rePressed(XBOX_DOWN) )
+            {
+                fractalMaxIt -= (1.0 + 9.0*xbox.pressed(XBOX_X))*3.0;
+                if (fractalMaxIt < 1)
+                    fractalMaxIt = 1;
+                std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
+            }
+
+            if ( xbox.rePressed(XBOX_RIGHT) ) // marchMaxIt control
+            {
+                marchMaxIt += (1.0 + 9.0*xbox.pressed(XBOX_X))*10.0;
+                std::cout << "march max it = " << marchMaxIt  << std::endl;
+            }
+            if ( xbox.rePressed(XBOX_LEFT) )
+            {
+                marchMaxIt -= (1.0 + 9.0*xbox.pressed(XBOX_X))*10.0;
+                if(marchMaxIt < 1)
+                    marchMaxIt = 1;
+                std::cout << "march max it = " << marchMaxIt  << std::endl;
+            }
+
+            if ( xbox.rePressed(XBOX_A) ) // for testing purposes
+            {
+                std::cout << xbox.trigger_R << std::endl;    
+            }
+
+            // Camera controll
+            float viewSpeed = 0.03;
+            vec2 joyAxis2 = vec2(xbox.stick_R_x, xbox.stick_R_y);
+            rightVec = normalize( rightVec - viewSpeed*joyAxis2.x*viewVec ) ;
+            upVec    = normalize( upVec    - viewSpeed*joyAxis2.y*viewVec ) ;
+            viewVec  = normalize( viewVec  + viewSpeed*joyAxis2.y*upVec + viewSpeed*joyAxis2.x*rightVec ) ;
+            rightVec = normalize( rightVec );
+            posVec   = posVec + 2.0*marchEpsilon*( 2.0*xbox.pressed(XBOX_B) +  1.0 )*(xbox.trigger_R - xbox.trigger_L)*viewVec; //( 0.01*xbox.pressed(XBOX_B) +  0.0001 )*(xbox.trigger_R - xbox.trigger_L)*viewVec;
+        }
 
         Draw();
         glfwPollEvents();
@@ -402,100 +460,20 @@ void initGL()
 
 void joystick_callback()
 {
-    // Configured for XBOX controller
+	int axesCount, buttonCount;
 
-	int axesCount;
+    const char *name = glfwGetJoystickName( GLFW_JOYSTICK_1 );
+    const float         *axes    = glfwGetJoystickAxes   ( GLFW_JOYSTICK_1, &axesCount   );
+    const unsigned char *buttons = glfwGetJoystickButtons( GLFW_JOYSTICK_1, &buttonCount );
 
-    const float *axes = glfwGetJoystickAxes( GLFW_JOYSTICK_1, &axesCount );
-     
     xbox.set_deadZone(0.30);
     xbox.set_sticks(axes);
     xbox.set_triggers(axes);
-
-   
-    int buttonCount;
-    const unsigned char *buttons = glfwGetJoystickButtons( GLFW_JOYSTICK_1, &buttonCount );
-
-    int xboxButtonState = 0;
-    xboxButtonState += buttons[0]  ? XBOX_A       : 0;
-    xboxButtonState += buttons[1]  ? XBOX_B       : 0;
-    xboxButtonState += buttons[2]  ? XBOX_X       : 0;
-    xboxButtonState += buttons[3]  ? XBOX_Y       : 0;
-    xboxButtonState += buttons[4]  ? XBOX_L1      : 0;
-    xboxButtonState += buttons[5]  ? XBOX_R1      : 0;
-    xboxButtonState += buttons[6]  ? XBOX_OPTION  : 0;
-    xboxButtonState += buttons[7]  ? XBOX_START   : 0;
-    xboxButtonState += buttons[8]  ? XBOX_AXIS1   : 0;
-    xboxButtonState += buttons[9]  ? XBOX_AXIS2   : 0;
-    xboxButtonState += buttons[10] ? XBOX_UP      : 0;
-    xboxButtonState += buttons[11] ? XBOX_RIGHT   : 0;
-    xboxButtonState += buttons[12] ? XBOX_DOWN    : 0;
-    xboxButtonState += buttons[13] ? XBOX_LEFT    : 0;
-    xbox.set_prevState(xbox.get_state());
-    xbox.set_state(xboxButtonState);
-
-    if ( xbox.rePressed(XBOX_L1) )
-    {
-        marchEpsilon *= 0.5;
-        std::cout << "march epsilon = " << marchEpsilon << std::endl;
-    }
-    if ( xbox.rePressed(XBOX_R1) )
-    {
-        marchEpsilon *= 5.0;
-        std::cout << "march epsilon = " << marchEpsilon << std::endl;
-    }
-
-    if ( xbox.rePressed(XBOX_UP) )
-    {
-        fractalMaxIt += (1 + 9*xbox.pressed(XBOX_X))*3;
-        std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
-    }
-    if ( xbox.rePressed(XBOX_DOWN) )
-    {
-        fractalMaxIt -= (1.0 + 9.0*xbox.pressed(XBOX_X))*3.0;
-        if (fractalMaxIt < 1)
-            fractalMaxIt = 1;
-        std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
-    }
-
-    if ( xbox.rePressed(XBOX_RIGHT) )
-    {
-        marchMaxIt += (1.0 + 9.0*xbox.pressed(XBOX_X))*10.0;
-        std::cout << "march max it = " << marchMaxIt  << std::endl;
-    }
-    if ( xbox.rePressed(XBOX_LEFT) )
-    {
-        marchMaxIt -= (1.0 + 9.0*xbox.pressed(XBOX_X))*10.0;
-        if(marchMaxIt < 1)
-            marchMaxIt = 1;
-        std::cout << "march max it = " << marchMaxIt  << std::endl;
-    }
-    if ( xbox.rePressed(XBOX_A) )
-    {
-        std::cout << xbox.trigger_R << std::endl;    
-    }
-    
-    const char *name = glfwGetJoystickName( GLFW_JOYSTICK_1 );
-
-    // Camera controll
-
-	float viewSpeed = 0.03;
-
-    vec2 joyAxis2 = vec2(xbox.stick_R_x, xbox.stick_R_y);
-
-    rightVec = normalize( rightVec - viewSpeed*joyAxis2.x*viewVec ) ;
-    upVec    = normalize( upVec    - viewSpeed*joyAxis2.y*viewVec ) ;
-    viewVec  = normalize( viewVec  + viewSpeed*joyAxis2.y*upVec + viewSpeed*joyAxis2.x*rightVec ) ;
-
-	rightVec = normalize( rightVec );
-
-	posVec   = posVec + ( 0.01*xbox.pressed(XBOX_B) +  0.0001 )*(xbox.trigger_R - xbox.trigger_L)*viewVec;
-
+    xbox.set_buttons(buttons);
 }
 
 void windowsize_callback(GLFWwindow *win, int width, int height)
 {
-
     resx = width;
     resy = height;
 
