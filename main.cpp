@@ -4,120 +4,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
-
-struct vec2 {
-    double x, y; 
- 
-    vec2(double x = 0.0, double y = 0.0) : x(x), y(y) {}
-};
- 
-
-struct vec3 {
-	double x, y, z;	
- 
-	vec3(double x = 0.0, double y = 0.0, double z = 0.0) : x(x), y(y), z(z) {}
-};
- 
-vec3 operator+(vec3 lhs, vec3 rhs) {
-	return vec3(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
-}
-
-vec3 operator-(vec3 lhs, vec3 rhs) {
-	return vec3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
-}
-
-vec3 operator*(vec3 lhs, double rhs) {
-	return vec3(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
-}
-
-vec3 operator*(double lhs, vec3 rhs) {
-	return vec3(lhs*rhs.x, lhs*rhs.y, lhs*rhs.z);
-}
- 
-vec3 operator/(vec3 lhs, double rhs) {
-	return vec3(lhs.x/rhs, lhs.y/rhs, lhs.z/rhs);
-}
-
-float norm(vec3 vec) {
-	return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
-}
-
-vec3 normalize(vec3 vec) {
-	return vec/norm(vec);
-}
-
-enum xboxButtonMap { XBOX_A = 1, XBOX_B = 2, XBOX_X = 4, XBOX_Y = 8, XBOX_UP = 16, XBOX_DOWN = 32, XBOX_RIGHT = 64, 
-                     XBOX_LEFT = 128, XBOX_L1 = 256, XBOX_R1 = 512, XBOX_OPTION = 1024, XBOX_START = 2048, XBOX_AXIS1 = 4096, XBOX_AXIS2 = 8192};
-
-class Controller
-{
-    public:
-
-        int state, prevState;
-        float trigger_L, trigger_R;
-        float dZ;  // deadZone
-        float stick_L_x, stick_L_y, stick_R_x, stick_R_y;
-
-        Controller ( )
-        {
-            state     = 0;
-            prevState = 0;
-
-            trigger_L = -1.0;
-            trigger_R = -1.0;
-            
-            stick_L_x = 0.0;
-            stick_L_y = 0.0;
-            stick_R_x = 0.0;
-            stick_R_y = 0.0;
-
-            dZ = 0.30;
-        }
-        void set_deadZone (float deadZone)
-        {
-            dZ = deadZone;
-        }
-
-        void set_sticks(const float * a)  
-        {
-            stick_L_x = ( a[0] > dZ ) ? (a[0] - dZ)/(1.0 - dZ) : std::min( (a[0] + dZ)/(1.0 - dZ) , 0.0);   // These computations handle the dead-zone problem 
-            stick_L_y = ( a[1] > dZ ) ? (a[1] - dZ)/(1.0 - dZ) : std::min( (a[1] + dZ)/(1.0 - dZ) , 0.0);
-            stick_R_x = ( a[2] > dZ ) ? (a[2] - dZ)/(1.0 - dZ) : std::min( (a[2] + dZ)/(1.0 - dZ) , 0.0);
-            stick_R_y = ( a[3] > dZ ) ? (a[3] - dZ)/(1.0 - dZ) : std::min( (a[3] + dZ)/(1.0 - dZ) , 0.0);
-        }
-        void set_triggers(const float * a)
-        { 
-            trigger_L =  ( a[4] > (dZ - 1.0) ) ? (a[4] - 0.5*dZ)/(1.0 - 0.5*dZ) : -1.0;  // These computations handle the dead-zone problem 
-            trigger_R =  ( a[5] > (dZ - 1.0) ) ? (a[5] - 0.5*dZ)/(1.0 - 0.5*dZ) : -1.0;
-        } 
-        void set_buttons(const unsigned char * b)
-        {
-            prevState = state;
-            state = 0;
-            state += b[0]  ? XBOX_A       : 0;
-            state += b[1]  ? XBOX_B       : 0;
-            state += b[2]  ? XBOX_X       : 0;
-            state += b[3]  ? XBOX_Y       : 0;
-            state += b[4]  ? XBOX_L1      : 0;
-            state += b[5]  ? XBOX_R1      : 0;
-            state += b[6]  ? XBOX_OPTION  : 0;
-            state += b[7]  ? XBOX_START   : 0;
-            state += b[8]  ? XBOX_AXIS1   : 0;
-            state += b[9]  ? XBOX_AXIS2   : 0;
-            state += b[10] ? XBOX_UP      : 0;
-            state += b[11] ? XBOX_RIGHT   : 0;
-            state += b[12] ? XBOX_DOWN    : 0;
-            state += b[13] ? XBOX_LEFT    : 0;
-        }
-        bool pressed (int button)
-        {
-            return (button & state);
-        }
-        bool rePressed (int button)
-        {
-            return (!(button & prevState) && (button & state)) ;
-        }
-};
+#include "controller.h"
+#include "vec.h"
 
 Controller xbox;
 
@@ -137,8 +25,6 @@ int fractalMaxIt    = 10;
 int marchMaxIt      = 100;
 float marchEpsilon  = 0.01;
 
-// int xboxButtonState = 0;
-
 // CAMERA INITIALIZATION 
 vec3 rightVec  = vec3(1.0,  0.0,  0.0);
 vec3 upVec     = vec3(0.0,  1.0,  0.0);
@@ -147,15 +33,10 @@ vec3 posVec    = vec3(0.0,  0.0,  5.0);
 
 float frustumD = resx; //Depth of frustum
 
-int joystickPresent;
 int clickedButtons = 0;
 
 enum buttonMaps { FIRST_BUTTON=1, SECOND_BUTTON=2, THIRD_BUTTON=4, FOURTH_BUTTON=8, FIFTH_BUTTON=16, NO_BUTTON=0 };
 enum modifierMaps { CTRL=2, SHIFT=1, ALT=4, META=8, NO_MODIFIER=0 };
-
-
-
-int drawMandelbrot = 1;
 
 GLuint programID;
 GLuint VertexArrayID;
@@ -276,7 +157,7 @@ int main()
 
     while ( !glfwWindowShouldClose(window)) 
     {
-    	joystickPresent = glfwJoystickPresent( GLFW_JOYSTICK_1 );
+    	int joystickPresent = glfwJoystickPresent( GLFW_JOYSTICK_1 );
     	// std::cout << "Joystick status: " << present << std::endl;   
 		if (joystickPresent)
         {
