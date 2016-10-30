@@ -1,5 +1,7 @@
 #version 330 core
 
+in vec3 fragmentColor;
+
 // Ouput data
 out vec3 color;
 
@@ -7,8 +9,6 @@ out vec3 color;
 float pi = 3.1415926535897932384626433832795;
 
 // window variables
-uniform float minx; // x-coordinate lower left corner of camera
-uniform float miny; // y-cooridnate lower left corner of camera
 uniform float resx; // width of window in pixels
 uniform float resy; // height of window in pixels
 
@@ -43,7 +43,7 @@ vec3 rayDir = normalize(frustumD*viewVec + Xc*rightVec + Yc*upVec);
 #define POWER_PARAM  4.0
 #define MAX_FRACTAL_DIST 1.2
 
-#define MAX_MARCH 10.0
+#define MAX_MARCH 5.0
 
 #define MAX_ITER_LIGHT 100
 #define EPSILON_LIGHT 0.01
@@ -60,7 +60,8 @@ vec3 rayDir = normalize(frustumD*viewVec + Xc*rightVec + Yc*upVec);
 void main() {
 
 	vec3 fogColor = vec3(0.5,0.5,0.5);
-	fogColor = vec3(0.0,0.0,0.0);
+	fogColor = vec3(1.0,0.0,0.0);
+	fogColor = fragmentColor.xyz;
 	color = fogColor;
 
 	float t = 0.0;
@@ -73,7 +74,7 @@ void main() {
 
 	vec3 ray, lightRay;
 
-	float maxFractalDist = 3.0 + pow(2.0,1.0/(POWER_PARAM-1.0));
+	float maxFractalDist = 3.0;
 
 
 	// Creat loop over 2 x 2 collection of rays and average for anti-aliasing
