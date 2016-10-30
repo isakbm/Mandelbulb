@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+
 #include "controller.h"
 #include "vec.h"
 
@@ -25,6 +26,12 @@ int fractalMaxIt    = 10;
 int marchMaxIt      = 100;
 float marchEpsilon  = 0.01;
 
+//test stuff
+double cam_x = -0.1, cam_y = -0.1; // world coordinates of lower-left corner of the window
+double cam_height = 1.2;
+double cam_width = cam_height*resx/double(resy); 
+
+
 // CAMERA INITIALIZATION 
 vec3 rightVec  = vec3(1.0,  0.0,  0.0);
 vec3 upVec     = vec3(0.0,  1.0,  0.0);
@@ -33,14 +40,19 @@ vec3 posVec    = vec3(0.0,  0.0,  5.0);
 
 float frustumD = resx; //Depth of frustum
 
+int shaderProgramToggle = 0;
+
 int clickedButtons = 0;
 
 enum buttonMaps { FIRST_BUTTON=1, SECOND_BUTTON=2, THIRD_BUTTON=4, FOURTH_BUTTON=8, FIFTH_BUTTON=16, NO_BUTTON=0 };
 enum modifierMaps { CTRL=2, SHIFT=1, ALT=4, META=8, NO_MODIFIER=0 };
 
 GLuint programID;
+GLuint programID2;
 GLuint VertexArrayID;
-GLuint vertexbuffer;    
+GLuint vertexbuffer; 
+GLuint colorbuffer; 
+ 
 
 static const GLfloat vertex_buffer_data[] =
 {
@@ -49,6 +61,15 @@ static const GLfloat vertex_buffer_data[] =
     -1.0f,  1.0f, 0.0f,
      1.0f,  1.0f, 0.0f,
 };
+
+const GLfloat color_buffer_data[] = 
+{
+      1.0f,  0.0f,  0.0f  , 
+      0.0f,  1.0f,  0.0f  , 
+      0.0f,  0.0f,  1.0f  , 
+      1.0f,  0.0f,  0.0f  , 
+}; 
+
 
 char *readFile(const char *filename)
 {
@@ -139,21 +160,35 @@ void mousebutton_callback(GLFWwindow* win, int button, int action, int mods);
 void mousepos_callback(GLFWwindow* win, double xpos, double ypos);
 void mousewheel_callback(GLFWwindow* win, double xoffset, double yoffset);
 
+//======================================================================================================================================================
+// Testing drawing pixel by pixel
+//======================================================================================================================================================
+
+//======================================================================================================================================================
+//======================================================================================================================================================
+
+
 int main()
 {
     initGL();
 
     // vertex buffers are bound to a vertex array object (VAO)
-    glGenVertexArrays(1, &VertexArrayID);
+    glGenVertexArrays(1, &VertexArrayID);  //?these are strictly not necessary but improve performance somewhat? 
     glBindVertexArray(VertexArrayID);
 
     // Create and compile our GLSL program from the shaders
-    programID = LoadShaders( "vertex_shader.vs", "fragment_shader.fs" );
+    programID = LoadShaders( "vertex_shader.vs", "fragment_shader.fs"  );
+    programID2 = LoadShaders( "vertex_shader.vs", "fragment_shader2.fs" );
 
     // vertex data are bound to vertex buffer objects (VBO)
     glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer); //we bind the first vertexbuffer and assign it vertex data
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_buffer_data), vertex_buffer_data, GL_STATIC_DRAW);  // copy to gpu
+
+    glGenBuffers(1, &colorbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer); //we bind the second vertexbuffer and assign it color data
+    glBufferData(GL_ARRAY_BUFFER, sizeof(color_buffer_data), color_buffer_data, GL_STATIC_DRAW);  // copy to gpu
 
     while ( !glfwWindowShouldClose(window)) 
     {
@@ -222,20 +257,28 @@ int main()
     }
 
     glDeleteBuffers(1, &vertexbuffer);
+    glDeleteBuffers(1, &colorbuffer);
     glDeleteVertexArrays(1, &VertexArrayID);
-    glDeleteProgram(programID);
+    glDeleteProgram(programID); 
+    glDeleteProgram(programID2); 
 
     glfwTerminate();
 
     return 0;
 }
 
+
 void Draw()
 {
     frameTime += 0.001;
 
     glClear(GL_COLOR_BUFFER_BIT);
-    glUseProgram(programID);
+
+    shaderProgramToggle = xbox.rePressed(XBOX_Y) ? (!shaderProgramToggle) : shaderProgramToggle;
+    if ( shaderProgramToggle == 0 )
+        glUseProgram(programID);
+    else 
+        glUseProgram(programID2);
 
     // ====================================================================================================
     // ------------------ TRANSFER DATA TO GPU SHADER -----------------------------------------------------
@@ -281,11 +324,23 @@ void Draw()
 
     // ====================================================================================================
 
-    glEnableVertexAttribArray(0);                            // matches shader layout specifier
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);             // vertex data bound to this buffer
-    glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,0,(void*)0); // specify layout (vec3, float)
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);                   // Draw the triangles using a triangle strip
+    int vb_location = 0;
+    glEnableVertexAttribArray(vb_location);                                     // argument matches shader layout location 
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);                                // vertex data bound to this buffer
+    glVertexAttribPointer(vb_location, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);     // specify layout (vec3, float)
+    
+    int cb_location = 1;
+    glEnableVertexAttribArray(cb_location);
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    glVertexAttribPointer(cb_location, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);                       // Draw the triangles using a triangle strip
+    
     glDisableVertexAttribArray(0);
+    // glDisableVertexAttribArray(1);
+
+
 
     // Swap buffers
     glfwSwapBuffers(window);
@@ -334,6 +389,7 @@ void initGL()
     glfwSetCursorPosCallback(window, mousepos_callback);
 
     glfwSwapInterval(1);
+
 
     // Dark blue background
     glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
