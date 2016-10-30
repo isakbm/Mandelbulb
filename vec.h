@@ -33,10 +33,10 @@ vec3 operator/(vec3 lhs, double rhs) {
 	return vec3(lhs.x/rhs, lhs.y/rhs, lhs.z/rhs);
 }
 
-float norm(vec3 vec) {
+float length(vec3 vec) {
 	return sqrt(vec.x*vec.x + vec.y*vec.y + vec.z*vec.z);
 }
 
 vec3 normalize(vec3 vec) {
-	return vec/norm(vec);
+	return vec/length(vec);
 }
