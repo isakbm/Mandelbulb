@@ -12,36 +12,32 @@ Controller xbox;
 
 double PI = 4.0*atan(1.0);
 
+// WINDOW
 GLFWwindow* window;
 double prevx = -1, prevy = -1;
-double resx = 1100, resy = 600;
+double resx = 1193, resy = 720;
 
+// "COUNTING" RENDERED FRAMES
 float frameTime = 0.0; 
-
-float disVecX    = 0.0;
-float disVecY    = 0.0;
-float disVecZ    = 0.0;
-
-int fractalMaxIt    = 10;
-int marchMaxIt      = 100;
-float marchEpsilon  = 0.01;
-
-//test stuff
-double cam_x = -0.1, cam_y = -0.1; // world coordinates of lower-left corner of the window
-double cam_height = 1.2;
-double cam_width = cam_height*resx/double(resy); 
-
 
 // CAMERA INITIALIZATION 
 vec3 rightVec  = vec3(1.0,  0.0,  0.0);
 vec3 upVec     = vec3(0.0,  1.0,  0.0);
 vec3 viewVec   = vec3(0.0,  0.0, -1.0);
 vec3 posVec    = vec3(0.0,  0.0,  5.0);
-
 float frustumD = resx; //Depth of frustum
 
-int shaderProgramToggle = 0;
+// RELATED TO RAY-MARCHED FRACTAL
+int fractalMaxIt    = 10;
+int marchMaxIt      = 40;
+float marchEpsilon  = 0.01;
+float lightAdjust = 1.0;
+float logCoeffDE = 0.5;
+float powerParam = 6.0;
+float maxFractalDist = 3.0;
 
+// MISC GLOBALS
+int shaderProgramToggle = 0;
 int clickedButtons = 0;
 
 enum buttonMaps { FIRST_BUTTON=1, SECOND_BUTTON=2, THIRD_BUTTON=4, FOURTH_BUTTON=8, FIFTH_BUTTON=16, NO_BUTTON=0 };
@@ -53,7 +49,6 @@ GLuint VertexArrayID;
 GLuint vertexbuffer; 
 GLuint colorbuffer; 
  
-
 static const GLfloat vertex_buffer_data[] =
 {
     -1.0f, -1.0f, 0.0f,
@@ -167,6 +162,49 @@ void mousewheel_callback(GLFWwindow* win, double xoffset, double yoffset);
 //======================================================================================================================================================
 //======================================================================================================================================================
 
+// =============== TO DO FINISH IMPLEMENTING FRACTAL RAY TRACING ON CPU SIDE 
+float DE(vec3 ray)
+{
+// return 2;
+    vec3 z = ray;
+    float r = 0.0;  // r =  |f(0;c) | = | z | ,                     where  f(n;c) = f(n-1;c)^2 + c    and of course  f(0;c) = 0
+    float dr = 1.0; // dr = |f'(0;c)| = 2 | prevz | prevdr + 1 ,    computes to  f'(n;c) = 2 f(n-1;c)f'(n-1;c) + 1
+    
+    int escapeTime = 0;
+
+
+    for (int ii = 0; ii < fractalMaxIt ; ii++) { 
+        r = length(z);
+        if (r > maxFractalDist)
+        {
+            escapeTime = ii;
+            break;
+        }
+        
+        // convert to polar coordinates
+        float theta = acos(z.z/r);
+        float phi = atan2(z.y,z.x);
+        float rpow = pow(r,powerParam - 1.0);
+        dr = rpow*powerParam*dr + 1.0; //dr =  pow( r, powerParam - 1.0)*powerParam*dr + 1.0;
+
+        
+        // scale and rotate the point
+        float zr =  rpow*r; //pow( r, powerParam);
+        theta = theta*powerParam;
+        phi = phi*powerParam;
+
+        
+        // convert back to cartesian coordinates
+        z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+        z = z + ray;
+        
+    }
+    return logCoeffDE*log(r)*r/dr;
+    // return 0.0;
+}
+// ===================
+
+
 
 int main()
 {
@@ -178,6 +216,7 @@ int main()
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders( "vertex_shader.vs", "fragment_shader.fs"  );
+    // programID2 = programID;
     programID2 = LoadShaders( "vertex_shader.vs", "fragment_shader2.fs" );
 
     // vertex data are bound to vertex buffer objects (VBO)
@@ -213,15 +252,29 @@ int main()
 
             if ( xbox.rePressed(XBOX_UP) ) // fractalMaxIt control
             {
-                fractalMaxIt += (1 + 9*xbox.pressed(XBOX_X))*3;
-                std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
+                if ( xbox.pressed(XBOX_B) )
+                {
+                    fractalMaxIt += (1 + 9*xbox.pressed(XBOX_X))*3;
+                    std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
+                }
+                else
+                {   
+                    lightAdjust += 0.1;
+                }
             }
             if ( xbox.rePressed(XBOX_DOWN) )
             {
-                fractalMaxIt -= (1.0 + 9.0*xbox.pressed(XBOX_X))*3.0;
-                if (fractalMaxIt < 1)
-                    fractalMaxIt = 1;
-                std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
+                if ( xbox.pressed(XBOX_B) )
+                {
+                    fractalMaxIt -= (1.0 + 9.0*xbox.pressed(XBOX_X))*3.0;
+                    if (fractalMaxIt < 1)
+                        fractalMaxIt = 1;
+                    std::cout << "fractal max it = " << fractalMaxIt  << std::endl;
+                }
+                else
+                {
+                    lightAdjust -= 0.1;
+                }
             }
 
             if ( xbox.rePressed(XBOX_RIGHT) ) // marchMaxIt control
@@ -237,10 +290,24 @@ int main()
                 std::cout << "march max it = " << marchMaxIt  << std::endl;
             }
 
+            if (xbox.pressed(XBOX_AXIS2) && xbox.rePressed(XBOX_AXIS1))
+            {
+                logCoeffDE += 0.01;
+                std::cout << "logCoeffDE = " << logCoeffDE  << std::endl;
+
+            }
+            if (xbox.pressed(XBOX_AXIS1) && xbox.rePressed(XBOX_AXIS2))
+            {
+                logCoeffDE -= 0.01;
+                std::cout << "logCoeffDE = " << logCoeffDE  << std::endl;
+
+            }
             if ( xbox.rePressed(XBOX_A) ) // for testing purposes
             {
                 std::cout << xbox.trigger_R << std::endl;    
             }
+
+
 
             // Camera controll
             float viewSpeed = 0.03;
@@ -276,9 +343,14 @@ void Draw()
 
     shaderProgramToggle = xbox.rePressed(XBOX_Y) ? (!shaderProgramToggle) : shaderProgramToggle;
     if ( shaderProgramToggle == 0 )
+    {
         glUseProgram(programID);
+    }
     else 
+    {
         glUseProgram(programID2);
+
+    }
 
     // ====================================================================================================
     // ------------------ TRANSFER DATA TO GPU SHADER -----------------------------------------------------
@@ -322,6 +394,19 @@ void Draw()
     if (loc != -1) 
         glUniform1f(loc, marchEpsilon);
 
+    loc = glGetUniformLocation(programID, "logCoeffDE"); 
+    if (loc != -1) 
+        glUniform1f(loc, logCoeffDE);
+
+    loc = glGetUniformLocation(programID, "lightAdjust"); 
+    if (loc != -1) 
+        glUniform1f(loc, lightAdjust);
+    loc = glGetUniformLocation(programID, "powerParam"); 
+    if (loc != -1) 
+        glUniform1f(loc, powerParam);
+    loc = glGetUniformLocation(programID, "maxFractalDist"); 
+    if (loc != -1) 
+        glUniform1f(loc, maxFractalDist);
     // ====================================================================================================
 
     int vb_location = 0;
