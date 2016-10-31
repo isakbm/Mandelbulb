@@ -313,8 +313,8 @@ int main()
             float viewSpeed = 0.03;
             vec2 joyAxis2 = vec2(xbox.stick_R_x, xbox.stick_R_y);
             rightVec = normalize( rightVec - viewSpeed*joyAxis2.x*viewVec ) ;
-            upVec    = normalize( upVec    - viewSpeed*joyAxis2.y*viewVec ) ;
-            viewVec  = normalize( viewVec  + viewSpeed*joyAxis2.y*upVec + viewSpeed*joyAxis2.x*rightVec ) ;
+            upVec    = normalize( upVec    + viewSpeed*joyAxis2.y*viewVec ) ;
+            viewVec  = normalize( viewVec  - viewSpeed*joyAxis2.y*upVec + viewSpeed*joyAxis2.x*rightVec ) ;
             rightVec = normalize( rightVec );
             posVec   = posVec + 2.0*marchEpsilon*( 2.0*xbox.pressed(XBOX_B) +  1.0 )*(xbox.trigger_R - xbox.trigger_L)*viewVec; //( 0.01*xbox.pressed(XBOX_B) +  0.0001 )*(xbox.trigger_R - xbox.trigger_L)*viewVec;
         }
