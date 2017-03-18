@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <string.h>
 
 #include "controller.h"
 #include "vec.h"
@@ -13,6 +14,8 @@ Controller xbox;
 double PI = 4.0*atan(1.0);
 
 // WINDOW
+
+
 GLFWwindow* window;
 double prevx = -1, prevy = -1;
 double resx = 1193, resy = 720;
@@ -218,6 +221,7 @@ int main()
     programID = LoadShaders( "vertex_shader.vs", "fragment_shader.fs"  );
     // programID2 = programID;
     programID2 = LoadShaders( "vertex_shader.vs", "fragment_shader2.fs" );
+    // programID3 = LoadShaders( "passthroughVertex.vs", "fragment_shader2.fs" );
 
     // vertex data are bound to vertex buffer objects (VBO)
     glGenBuffers(1, &vertexbuffer);
@@ -231,6 +235,24 @@ int main()
 
     while ( !glfwWindowShouldClose(window)) 
     {
+        // Display FPS in window title
+     // calculate time between frames
+        static double t1 = glfwGetTime(); // store previous time
+        double t2 = glfwGetTime();
+        double dt = t2-t1;
+        t1 = t2;
+        
+        // change window title to show exponentially averaged fps, should probably move somewhere else...
+        double alpha = 0.02;
+        static double dt_smooth = 1.0/60;
+        dt_smooth = dt*alpha + dt_smooth*(1.0 - alpha);
+        char str[256];
+        sprintf(str, "Mandelbulb | FPS = %f", 1.0/dt_smooth);
+        glfwSetWindowTitle(window, str);
+
+
+       
+
     	int joystickPresent = glfwJoystickPresent( GLFW_JOYSTICK_1 );
     	// std::cout << "Joystick status: " << present << std::endl;   
 		if (joystickPresent)
@@ -446,7 +468,7 @@ void initGL()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(resx, resy, "Mandelbrot", 0, 0);
+    window = glfwCreateWindow(resx, resy, "Mandelbulb", 0, 0);
 
     if (!window)
     {
