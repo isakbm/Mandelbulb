@@ -11,7 +11,7 @@
 
 ## The Mandelbrot Map
 
-The equation that encodes the Mandelbrot set is perhaps familiar to you, essentially the entire set is somehow hiding  withint the mapping
+The equation that encodes the Mandelbrot set is perhaps familiar to you, essentially the entire set is somehow hiding within the mapping
 
 ` z ->  z*z + c `
 
@@ -19,9 +19,9 @@ where `z` and `c` are complex number.
 
 ## Rendering the Mandelbrot Set
 
-When one repeadely applies the Mandelbrot map to a given compex number. That is, you take the output and put it back into the mapping, you get a sequence that you could continue indefinitely.
+When one repeatedly applies the Mandelbrot map to a given complex number. That is, you take the output and put it back into the mapping, you get a sequence that you could continue indefinitely.
 
-The Mandelbrot set is defined as the set of complex numbers whose Mandelbrot map sequences do not escape to infinity (diverge). For instance, the point `c = 2.0` is not in the Mandelbrot set since aplying the map serveral times produces the sequence:
+The Mandelbrot set is defined as the set of complex numbers whose Mandelbrot map sequences do not escape to infinity (diverge). For instance, the point `c = 2.0` is not in the Mandelbrot set since applying the map several times produces the sequence:
 
 ```0.0,
 2.0,
@@ -36,7 +36,7 @@ The Mandelbrot set is defined as the set of complex numbers whose Mandelbrot map
 ...
 ```
 
-But hang on, even though it is quite intuitive that this will continue to grow indefinitely, it is not that easy to see in general. At every step in the sequence it is possible to perform a test (checking whether `|z| >= 2.0`) which if it is true implies that the seuqnces is going to diverge. A sketh of a proof is reserved for later.
+But hang on, even though it is quite intuitive that this will continue to grow indefinitely, it is not that easy to see in general. At every step in the sequence it is possible to perform a test (checking whether `|z| >= 2.0`) which if it is true implies that the sequences is going to diverge. A sketch of a proof is reserved for later.
 
 In general it is harder to say whether something is truly in the Mandelbrot set or not, but one becomes more certain the further along one iterates the sequence as illustrated:
 
