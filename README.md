@@ -9,23 +9,40 @@
 
 -----------------------
 
-The equation that encodes the Mandelbrot set is perhaps familiar to you
+## The Mandelbrot Map
 
-` z ->  z*z + C `
+The equation that encodes the Mandelbrot set is perhaps familiar to you, essentially the entire set is somehow hiding  withint the mapping
 
-where `z` and `c` are complex numbers. The input, `c`, is fixed and the equation is iterated starting from `z = 0`. The result is a sequence of complex numbers where the first one is `c`, the second one is `c + c*c`, and so on. If `c` is picked to represent a pixel on the screen, that is 
+` z ->  z*z + c `
 
-`c = x + iy`
+where `z` and `c` are complex number.
 
-then the transformation effectively displaces the original pixel coordinates ```(x,y)```, and eventually we might "escape". By escaping we mean that the distance to the origin has become greater than 2 (`|z| > 2`) then we bail.  
+## Rendering the Mandelbrot Set
 
-It can be shown the transformations will continue to increase the distance to the origin if (a proof is given at the end)
+When one repeadely applies the Mandelbrot map to a given compex number. That is, you take the output and put it back into the mapping, you get a sequence that you could continue indefinitely.
 
-`|z| > 2`.
+The Mandelbrot set is defined as the set of complex numbers whose Mandelbrot map sequences do not escape to infinity (diverge). For instance, the point `c = 2.0` is not in the Mandelbrot set since aplying the map serveral times produces the sequence:
 
-On the other hand, if the radius remains less than or equal to 2 after an infinite number of iterations, we say that the pixel corresponding to the initial value c is a member of the Mandelbrot set.
+```0.0,
+2.0,
+6.0,
+38.0,
+1446.0,
+2090918.0,
+4371938082726.0,
+1.9113842599189892e+25,
+3.653389789066062e+50,
+1.3347256950852164e+1010,
+...
+```
 
-Since we are unable to iterate to infinity we are always seeing an approximation of the Mandelbrot set, but the convergence is quite fast and a good approximation is easily gained within the limits of machine precision.
+But hang on, even though it is quite intuitive that this will continue to grow indefinitely, it is not that easy to see in general. At every step in the sequence it is possible to perform a test (checking whether `|z| >= 2.0`) which if it is true implies that the seuqnces is going to diverge. A sketh of a proof is reserved for later.
+
+In general it is harder to say whether something is truly in the Mandelbrot set or not, but one becomes more certain the further along one iterates the sequence as illustrated:
+
+![Iterations](http://i.imgur.com/CMHn3r7.png)
+
+The sets have been rendered by associating each pixel coordinate `(x,y)` with a different choice for the constant `c = x + iy`. White pixels are those that are definitely not in the set, whilst black pixels could be in the set.
 
 Generalizing to Three Dimensions
 ===========================================
