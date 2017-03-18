@@ -1,9 +1,13 @@
 
 **Mandelbulb Explorer** 
 =========================
---------------------------
 
-**This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the standard 2D fractal, the Mandelbrot set.**
+
+**This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the standard 2D fractal, the Mandelbrot set. In the video below you see the rendering in action. It is rendered in real time on a GTX960. The flight is controlled by an xbox controller.**
+
+[![Whoo](http://i.imgur.com/Uro1Atp.png)](https://youtu.be/TRwiLgBemGQ)
+
+-----------------------
 
 The equation that encodes the Mandelbrot set is perhaps familiar to you
 
@@ -25,7 +29,7 @@ Since we are unable to iterate to infinity we are always seeing an approximation
 
 Generalizing to Three Dimensions
 ===========================================
-------------------------------------------
+
 
 Let us now generalize to higher dimensions. Consider the position vector associated with c
 
@@ -62,7 +66,7 @@ where
 
 Generalizing to Higher Powers 
 ======================================
-----------------------------------
+
 
 We can generalize even more by considering
 
@@ -74,7 +78,6 @@ The name _Mandebulb_ is usually associated with the fractal that you get if you 
 
 Rendering 
 =================================
----------------------------------
 
 There is a tremendously powerful technique called _distance estimation_, which allows efficient rendering of the three dimensional fractals by use of regular _ray-marching techniques_. Essentially **John C. Hart**, **Daniel J. Sanding** and **Louis H. Kauffman** were the first to use this approach. Distance estimation says that for any position `p = (x,y,z)` you can compute a real number `d(p)`, which gives the radius of a sphere which centered at `p` contains a set of points (its volume) such that none of the points are in the fractal set. This number `d(p)` can then be used as the marching step parameter, and recomputed at every step until `d(p) < ε` at which point we say that we are close enough to the fractal and we render that point in the standard ray-tracing kind of way. A very useful resource on this technique can be found [**here**](http://blog.hvidtfeldts.net/index.php/2011/09/distance-estimated-3d-fractals-iv-the-holy-grail/)
 
@@ -108,7 +111,7 @@ that you see above, but that can be found in the literature.
 
 Proof of Bailout Condition for Mandelbrot
 ================================
---------------------------------
+
 
 **Claim**:
 
@@ -170,5 +173,3 @@ For any |c| greater than this local bailout value we have guaranteed divergence 
 `|c| = 1/2 ( 1 + sqrt(1 + 4 |c|) )`
 
 which gives that `|c| = 2` and hence that is the global bailout value.
-
------------------------------------------------------------------------------------------------------------
