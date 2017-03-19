@@ -15,13 +15,23 @@ The equation that encodes the Mandelbrot set is perhaps familiar to you, essenti
 
 ` z ->  z*z + c `
 
-where `z` and `c` are complex number.
+where `z` and `c` are complex number. From now on we will use the notation
+
+`z = z.x + i z.y` and similarly `c = c.x + i c.y` 
+
+or alternatively as vectors
+
+`z = (z.x, z.y)` 
+
+and the length (norm) is denoted 
+
+`|z| = sqrt(z.x*z.x + z.y*z.y)`
 
 ## Rendering the Mandelbrot Set
 
-When one repeatedly applies the Mandelbrot map to a given complex number. That is, you take the output and put it back into the mapping, you get a sequence that you could continue indefinitely.
+When one repeatedly applies the Mandelbrot map to a given complex number one produces a sequences of complex numbers.
 
-The Mandelbrot set is defined as the set of complex numbers whose Mandelbrot map sequences do not escape to infinity (diverge). For instance, the point `c = 2.0` is not in the Mandelbrot set since applying the map several times produces the sequence:
+The Mandelbrot set is defined as the set of complex numbers (choices of `c`) whose Mandelbrot map sequences do not escape to infinity (diverge). It turns out to be easier to look at the complement, those points which are not in the Mandelbrot set. For instance, the point `c = 2.0` is not in the Mandelbrot set since applying the map several times produces the sequence:
 
 ```0.0,
 2.0,
@@ -36,62 +46,57 @@ The Mandelbrot set is defined as the set of complex numbers whose Mandelbrot map
 ...
 ```
 
-But hang on, even though it is quite intuitive that this will continue to grow indefinitely, it is not that easy to see in general. At every step in the sequence it is possible to perform a test (checking whether `|z| >= 2.0`) which if it is true implies that the sequences is going to diverge. A sketch of a proof is reserved for later.
+Even though it is quite intuitive that this will continue to grow indefinitely, it is not that easy to see in general. There's a trick, it is possible to perform a test (checking whether `|z| >= 2.0`) at any point, which if it is true implies that the sequences is going to diverge. A sketch of a proof is reserved for later.
 
-In general it is harder to say whether something is truly in the Mandelbrot set or not, but one becomes more certain the further along one iterates the sequence as illustrated:
+In general it is hard to say whether something is truly in the Mandelbrot set or not, but one becomes more certain the further along one iterates the sequence, since more points are then identified as being outside the set. This is illustrated below:
 
 ![Iterations](http://i.imgur.com/CMHn3r7.png)
 
-The sets have been rendered by associating each pixel coordinate `(x,y)` with a different choice for the constant `c = x + iy`. White pixels are those that are definitely not in the set, whilst black pixels could be in the set.
+The sets have been rendered by associating each pixel coordinate `(c.x,c.y)` with a different choice for the constant `c = c.x + i c.y`. White pixels are those that are definitely not in the set, whilst black pixels could be in the set.
 
 Generalizing to Three Dimensions
 ===========================================
 
+Think of the complex number `c` as a vector `c = (c.x, c.y)`
 
-Let us now generalize to higher dimensions. Consider the position vector associated with c
+A step in the Mandelbrot iteration can then be viewed as a transformation on a vector. 
 
-`v = (x, y),`
-`|v| = sqrt(x^2 + y^2)`
+Using the Euler formula `z = |z| exp(i φ)` where `φ = atan(x, y)` makes it clear that
 
-A step in the iteration (1) can be interpreted as adding v rotated and scaled to v itself.
-Indeed, using the Euler formula makes this clear
+`z^2 = |z|^2 exp(2i φ)`
 
-`c = |v| exp(i φ)`
+hence the Mandelbrot map can be written as
 
-`c^2 = |v|^2 exp(2i φ)`
+`z -> |z| Rotate(z, φ) + c`
 
-where `φ = atan(x,y)`
+We see that squaring the complex number `z` is equivalent to doubling the length of `z` and rotating it by its argument `φ`. This viewpoint of the iterative procedure is begging for a naive generalization to higher dimensions by simply adding more angles which in turn increases the dimensionality of the space.
 
-hence
+Let us consider three dimensions, and let
 
-`c^2 + c = |v| Rotate(v, φ) + v`
+`c = (c.x, c.y, c.z)`
 
-We see that squaring the complex number `c` is equivalent to doubling the length of `v` and rotating it by an angle `φ`. This viewpoint of the iterative procedure is begging for a naive generalization to higher dimensions by simply adding another angle.
+the natural iterative step is
 
-We then pick a point 
-
-`p = (x,y,z)`
-
-and we let the iterative step be
-
-`p = p + |p| Rotate(p, θ, φ)`
+`z -> |z| Rotate(z, θ, φ) + c `
 
 where
 
-`φ = atan(x,y)`,
-`θ = acos(z/|p|)`.
+`φ = atan(z.x,z.y)`,
+`θ = acos(z.z/|z|)`.
 
 Generalizing to Higher Powers 
 ======================================
 
-
-We can generalize even more by considering
+We can generalize even more by considering other powers
 
 `z = z^pow + c`.
 
-It is clear that if we set `pow = 2` we recover what we considered above, but why not consider other powers. It is simple to deduce what the effect is in the 2D case for complex numbers. The result is that we should take the length to the power of pow, and we should rotate by `φ`, (`pow-1`) number of times. This is easy to generalize.
+It is clear that if we set `pow = 2` we recover what we considered above, but why not consider other powers. It is simple to deduce what the effect is in the 2D case for complex numbers. The result is that we should take the length to the power of `pow`, and we should rotate by `φ`, (`pow - 1`) number of times. This is easy to generalize to 3D
+
+`z -> |z|^(pow - 1) Rotate(z, (pow - 1)θ, (pow - 1)φ) + c `
 
 The name _Mandebulb_ is usually associated with the fractal that you get if you have `pow ~ 6` to `8`.
+
 
 Rendering 
 =================================
