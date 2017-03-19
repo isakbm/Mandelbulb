@@ -3,7 +3,7 @@
 =========================
 
 
-**This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the standard 2D fractal, the Mandelbrot set. In the video below you see the rendering in action. It is rendered in real time on a GTX960. The flight is controlled by an xbox controller.**
+**This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the standard 2D fractal, the Mandelbrot set. In the video below you see the rendering in action. It is rendered in real time on a GTX970. The flight is controlled by an xbox controller.**
 
 [![Whoo](http://i.imgur.com/Uro1Atp.png)](https://youtu.be/TRwiLgBemGQ)
 
