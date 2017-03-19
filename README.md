@@ -2,12 +2,19 @@
 **Mandelbulb Explorer** 
 =========================
 
-
 **This project explores the use of ray-marching to render a 3D fractal, specifically one known as the Mandelbulb. It is a generalization of the standard 2D fractal, the Mandelbrot set. In the video below you see the rendering in action. It is rendered in real time on a GTX970. The flight is controlled by an xbox controller.**
 
 [![Whoo](http://i.imgur.com/Uro1Atp.png)](https://youtu.be/TRwiLgBemGQ)
 
 -----------------------
+## Contents
+
+- [The Mandelbrot Map](#the-mandelbrot-map)
+- [Rendering the Mandelbrot Set](#rendering-the-mandelbrot-set)
+- [Generalizing to Higher Powers ](#generalizing-to-higher-powers)
+- [Rendering](#rendering)
+- [Proof of the Bailout Condition](#proof-of-the-bailout-condition)
+
 
 ## The Mandelbrot Map
 
@@ -131,7 +138,7 @@ now it's a simple matter to compute this for a given number of iterations, and t
 that you see above, but that can be found in the literature.
 
 
-Proof of Bailout Condition for Mandelbrot
+Proof of the Bailout Condition
 ================================
 
 
